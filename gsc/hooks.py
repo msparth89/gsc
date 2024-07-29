@@ -1,8 +1,8 @@
 app_name = "gsc"
-app_title = "Gsc"
+app_title = "gsc"
 app_publisher = "parth"
-app_description = "Global Supply chain"
-app_email = "msparth89@gmail.com"
+app_description = "global supply chain"
+app_email = "msparth@gmail.com"
 app_license = "mit"
 # required_apps = []
 
