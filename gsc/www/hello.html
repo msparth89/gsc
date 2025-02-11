@@ -1,0 +1,10 @@
+<div id="root">
+    Loading...
+  </div>
+  {{ include_script('myapp.bundle.js') }}
+  {{ include_style('myapp.bundle.css') }}
+
+  <script>
+    window.myapp.hello(document.getElementById('root'))
+  </script>
+  

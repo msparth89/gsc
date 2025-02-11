@@ -74,7 +74,21 @@ def add_custom_fields():
                 "insert_after": "country_code",
                 "read_only": 0
             }
-        ]
+        ],
+        # "Website Item": [
+        #     {
+        #         # "fieldname": "vpa_id",
+        #         # "label": "VPA ID",
+        #         # "fieldtype": "Data",
+        #         # "insert_after": "employee",
+        #         # "read_only": 0,
+        #         "fieldname": "avaliable_at",
+        #         "label": "Avaliable At",
+        #         "fieldtype": "Table",
+        #         "label": "Item Defaults",
+        #         "options": "Item Default",
+        #     }
+        # ]
     }
 
     for doctype, fields in custom_fields.items():

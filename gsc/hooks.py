@@ -1,8 +1,8 @@
-app_name = "gsc"
+app_name = "Gsc"
 app_title = "gsc"
 app_publisher = "parth"
 app_description = "global supply chain"
-app_email = "msparth@gmail.com"
+app_email = "msparth89@gmail.com"
 app_license = "mit"
 # required_apps = []
 
@@ -15,7 +15,7 @@ app_license = "mit"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/gsc/css/gsc.css"
-# web_include_js = "/assets/gsc/js/gsc.js"
+web_include_js = "/assets/gsc/js/webshop-cart.min.js"
 
 # include custom scss in every website theme (without file extension ".scss")
 # website_theme_scss = "gsc/public/scss/website"
@@ -227,3 +227,41 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+# gsc/hooks.py
+
+doc_events = {
+    "User": {
+        "after_insert": "gsc.api.user_after_insert"
+    }
+}
+
+# gsc/hooks.py
+
+after_install = "gsc.install.after_install"
+
+# gsc/hooks.py
+
+after_uninstall = "gsc.uninstall.before_uninstall"
+
+
+# apps/gsc/gsc/hooks.py
+
+website_route_rules = [
+    {"from_route": "/login", "to_route": "login"},
+    {"from_route": "/test-portal", "to_route": "test_portal"}
+]
+
+
+
+# website_path_resolver="gsc.api.custom_path_resolver"
+
+website_redirects = [
+{ "source": r"/\?p(.*)", "target": r"/circulate/?\1", "match_with_query_string": True },
+# { "source": "/", "target": "/circulate" }
+
+]
+
+# # my_app/hooks.py
+# website_routes = [
+#     {"from_route": "/test-portal", "to_route": "test_portal"}
+# ]

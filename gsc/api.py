@@ -3,33 +3,20 @@ import string
 import random
 import requests
 from frappe.utils import get_site_name
-from frappe.auth import CookieManager, LoginManager
-from frappe import auth
 
-import frappe
-from frappe.website.path_resolver import resolve_path as original_resolve_path
-from frappe import _
 
 REDIS_PREFIX = "otp"
+# REDIS_PREFIXPHONE = "otp"
+
 
 @frappe.whitelist(allow_guest=True)
 def generate_otp():
-    print("ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
     return generate_otp_for_phone(frappe.form_dict.country_code,frappe.form_dict.phone_no)
 
 
 @frappe.whitelist(allow_guest=True)
 def verify_otp():
-    phone = frappe.form_dict.country_code+frappe.form_dict.verify_otp
-    key = f"{REDIS_PREFIX}:{phone}"
-    cachedvalue = frappe.cache().get(key)
-
-    # if cached_value:
-    # decoded_value = cachedvalue.decode("utf-8")
-    print(" --------------          ",cachedvalue)
-    # else:
-    print("No value found in cache for the specified key")
-        # return verify_otp_for_phone(frappe.form_dict.country_code, frappe.form_dict.phone_no, frappe.form_dict.verify_otp)
+    return verify_otp_for_phone(frappe.form_dict.country_code, frappe.form_dict.phone_no, frappe.form_dict.verify_otp, frappe.form_dict.countryname, frappe.form_dict.shortcountryname)
 
 
 
@@ -72,15 +59,11 @@ def generate_otp_for_phone(country_code,phone_no):
         "message": None,
     }
     phone = country_code+phone_no  # Set India as default
-    print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy", phone)
     otp = random_string_generator(4, string.digits)
     frappe.cache().set(f"{REDIS_PREFIX}:{phone}", otp, ex=300)
 
     key = f"{REDIS_PREFIX}:{phone}"
-    # stored_otp = frappe.cache().get(key).decode("utf-8")
-    stored_otp = frappe.cache().get(key)
 
-    print(" 888888888888888888888         ------------         ",stored_otp)
     try:
         # send_sms(phone=phone, otp=otp, domain=domain)
         payload["success"] = True
@@ -92,44 +75,43 @@ def generate_otp_for_phone(country_code,phone_no):
     return payload
 
 
-def verify_otp_for_phone(country_code,phone_no,otp):
+def verify_otp_for_phone(country_code,phone_no,otp,countryname,shortcountryname):
+    phone=phone_no
     payload = {
         "success": False,
         "message": None,
     }
-    # if phone[0] != "+":
-        # phone = f"+91{phone}"  # Set India as default
+    if phone[0] != "+":
+        phone = f"+91{phone}"  # Set India as default
     phone = country_code+phone_no
     key = f"{REDIS_PREFIX}:{phone}"
     stored_otp = frappe.cache().get(key).decode("utf-8")
-    print(" 111111111111111111111111111         ------------         ",stored_otp)
 
-    login_manager = frappe.auth.LoginManager()
 
     if not stored_otp == otp:
         payload["message"] = "Incorrect OTP."
         return payload
-    try:
-        user = frappe.db.get("User", {"mobile_no": phone_no,"country_code" : country_code})
-    # if not user:
-        # create_user(country_code,phone_no)
-        # create_sales_partner(country_code,phone_no)
-        # frappe.cache().delete_key(key)
-        # login_manager.post_login()
-    except Exception as e:
-        payload["message"] = "User not found. and created one"
+    # try:
+    user = frappe.db.get("User", {"mobile_no": phone_no,"country_code" : country_code})
+    if not user:
         create_user(country_code,phone_no)
         create_sales_partner(country_code,phone_no)
-        return payload
+
 
     # Delete stored OTP
+    frappe.cache().delete_key(key)
 
     # Now log in as user
-    frappe.utils.set_request(path="/")
+    from frappe.auth import CookieManager, LoginManager
+
+    # frappe.utils.set_request(path="/")
     frappe.local.cookie_manager = CookieManager()
     frappe.local.login_manager = LoginManager()
+    user = frappe.db.get("User", {"mobile_no": phone_no,"country_code" : country_code})
+    frappe.cache().set(user.name,countryname)
+    frappe.local.response["location"] = "http://asiatech.com:8000/all-products"
+    
     return frappe.local.login_manager.login_as(user.name)
-
 
 
 
@@ -165,7 +147,7 @@ def create_user(country_code,phone_no):
 def create_sales_partner(country_code,phone_no):
     print("qqqqqqqqqqqqqqqqqqqqqqqq")
     if frappe.db.exists("Sales Partner", {"mobile_no": phone_no,"country_code" : country_code, "Territory": "All Territories"}):
-        Print("Sales Person No already allocated to another User")
+        print("Sales Person No already allocated to another User")
     # if frappe.db.exists("User", {'email': self.personal_email}):
     #     frappe.throw(_("Email ID is already allocated to another User"))
     site_name = get_site_name(frappe.local.request.host) 
@@ -232,3 +214,20 @@ def custom_path_resolver(path):
     # If no "abc" parameter, return None to continue normal routing
     return None
 
+@frappe.whitelist()
+def maashakti():
+
+    frappe.clear_messages()
+    frappe.local.response["type"] = "redirect"
+    frappe.local.response["location"] = "http://asiatech.com:8000/all-products"
+
+    
+    
+import frappe
+
+@frappe.whitelist()
+def render_sample_template(name, project):
+    template_path = "gsc/templates/sample_template.html"
+    context = {"name": name, "project": project}
+    template_content = frappe.get_file(template_path).read()
+    return frappe.render_template(template_content, context)
