@@ -1,7 +1,25 @@
-.DS_Store
+# .DS_Store
+# *.pyc
+# *.egg-info
+# *.swp
+# tags
+# node_modules
+# __pycache__
+
 *.pyc
-*.egg-info
 *.swp
-tags
-node_modules
-__pycache__
+*.swo
+*.DS_Store
+*.log
+*.sqlite
+*.tar
+*.zip
+*.bak
+*.tmp
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+node_modules/
+.env
+config/
